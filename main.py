@@ -18,18 +18,19 @@ warnings.simplefilter("ignore", DeprecationWarning)
 
 conversational_memory = ConversationBufferWindowMemory(
     memory_key='chat_history',
+    ai_prefix='AI',
     k=5,
     return_messages=True
 )
 
 llm = ChatOpenAI(
     openai_api_key=openai_key,
-    temperature=0,
+    temperature=0.2,
     model_name="gpt-3.5-turbo"
 )
 
 agent = initialize_agent(
-    agent=AgentType.CONVERSATIONAL_REACT_DESCRIPTION,
+    agent="chat-conversational-react-description",
     tools=tools,
     llm=llm,
     max_iterations=2,
@@ -37,10 +38,11 @@ agent = initialize_agent(
     memory=conversational_memory,
     handle_parsing_errors=True,
     early_stopping_method='generate'
+    # check the output format
 )
 
 # set title
-st.title('BankFlix Chatbot')
+st.title('🏦 BankFlix Chatbot')
 
 # set header
 st.header("Welcome dear bank employee!")

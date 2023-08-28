@@ -46,7 +46,7 @@ class TotalRevenueReaderTool(BaseTool):
 ### ClientSimilarityTool #########
 class ClientSimilarityTool(BaseTool):
     name = "Client Similarity Tool"
-    description = "This tool will find the most similar client to the given client"
+    description = "This tool will find the most similar client to the given client on different critera like credit card"
 
     def _run(self, user_question):
         model_id = "text-embedding-ada-002"
