@@ -3,6 +3,7 @@ from dotenv import dotenv_values
 from langchain.agents import initialize_agent, AgentType
 from langchain.chat_models import ChatOpenAI
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
+import warnings
 
 from tools import TotalRevenueReaderTool, ClientSimilarityTool
 
@@ -12,6 +13,8 @@ from tools import TotalRevenueReaderTool, ClientSimilarityTool
 tools = [TotalRevenueReaderTool(), ClientSimilarityTool()]
 config = dotenv_values('.env')
 openai_key = config['OPENAI_API_KEY']
+
+warnings.simplefilter("ignore", DeprecationWarning)
 
 conversational_memory = ConversationBufferWindowMemory(
     memory_key='chat_history',
@@ -29,21 +32,23 @@ agent = initialize_agent(
     agent=AgentType.CONVERSATIONAL_REACT_DESCRIPTION,
     tools=tools,
     llm=llm,
-    max_iterations=5,
+    max_iterations=2,
     verbose=True,
     memory=conversational_memory,
+    handle_parsing_errors=True,
     early_stopping_method='generate'
 )
 
 # set title
-st.title('Ask a question about total revenue only please')
+st.title('BankFlix Chatbot')
 
 # set header
-st.header("Please ask now")
+st.header("Welcome dear bank employee!")
 
-user_question = st.text_input('Ask a question about total revenue only please:')
-if user_question:
+user_question = st.text_input('Ask a question here:')
+# if the question has more than 5 characters, run the agent
+if len(user_question) > 5:
     with st.spinner(text="In progress..."):
-        response = agent.run(user_question)
+        response = agent.run('{}, {}'.format(user_question, user_question))
         st.write(response)
 

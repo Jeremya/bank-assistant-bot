@@ -1,4 +1,5 @@
 from langchain.tools import BaseTool
+from langchain.text_splitter import CharacterTextSplitter
 
 from cassandra.cluster import Cluster
 from cassandra.auth import PlainTextAuthProvider
@@ -18,7 +19,7 @@ ASTRA_KEYSPACE_NAME = config['ASTRA_KEYSPACE_NAME']
 # Open a connection to the Astra database
 cloud_config = {
     'secure_connect_bundle': SECURE_CONNECT_BUNDLE_PATH
-    }
+}
 auth_provider = PlainTextAuthProvider(ASTRA_CLIENT_ID, ASTRA_CLIENT_SECRET)
 cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
 session = cluster.connect()
@@ -29,7 +30,7 @@ class TotalRevenueReaderTool(BaseTool):
     name = "Total Revenue Reader"
     description = "This tool will read the total revenue from the Astra database"
 
-    def _run(self, client_id): # add user uuid
+    def _run(self, client_id):  # add user uuid
         client_id = "1"
         query = f"SELECT total_revenue FROM {ASTRA_KEYSPACE_NAME}.TotalRevenueByClient WHERE client_id = {client_id}"
         rows = session.execute(query)
@@ -41,6 +42,7 @@ class TotalRevenueReaderTool(BaseTool):
     def _arun(self, query: str):
         raise NotImplementedError("This tool does not support async")
 
+
 ### ClientSimilarityTool #########
 class ClientSimilarityTool(BaseTool):
     name = "Client Similarity Tool"
@@ -49,12 +51,17 @@ class ClientSimilarityTool(BaseTool):
     def _run(self, user_question):
         model_id = "text-embedding-ada-002"
         embedding = openai.Embedding.create(input=user_question, model=model_id)['data'][0]['embedding']
-        query = f"SELECT client_id, surname, embedding_client FROM {ASTRA_KEYSPACE_NAME}.ClientById ORDER BY embedding_client ANN OF {embedding} LIMIT 1"
+        query = f"SELECT client_id, surname, credit_score, location, gender, age, balance, has_credit_card, " \
+                f"estimated_salary, satisfaction_score, card_type, point_earned FROM {ASTRA_KEYSPACE_NAME}.ClientById " \
+                f"ORDER BY embedding_client ANN OF {embedding} LIMIT 1 "
         rows = session.execute(query)
-        for row in rows:
-            st.write(row.embedding_client)
 
-        return row.embedding_client
+        client_list = []
+        for row in rows._current_rows:
+            brand_dict = {f"client id is {row.client_id}, current balance is {row.balance}, client's surname is {row.surname}, age is {row.age}, gender is {row.gender} , card type owned by client is {row.card_type}, credit score is {row.credit_score}, satisfaction score is {row.satisfaction_score}, point earned is {row.point_earned}, this client is located in {row.location}, client has a credit card is {row.has_credit_card}"}
+            client_list.append(brand_dict)
+
+        return client_list
 
     def _arun(self, query: str):
         raise NotImplementedError("This tool does not support async")
