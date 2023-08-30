@@ -4,7 +4,7 @@ Bank Assistant chat bot using LLM and AstraDB
 ## Pre-requisites
 
 - Python 3.6+
-- AstraDB database
+- Launch an [AstraDB](https://astra.datastax.com/) database
 - AstraDB SCB and Credentials
 
 ## Setup

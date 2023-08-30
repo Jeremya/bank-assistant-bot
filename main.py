@@ -3,18 +3,15 @@ from dotenv import dotenv_values
 from langchain.agents import initialize_agent, AgentType
 from langchain.chat_models import ChatOpenAI
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
-import warnings
 
-from tools import TotalRevenueReaderTool, ClientSimilarityTool
+from tools import TotalRevenueReaderTool, ClientSimilarityTool, GetClientInformationTool
 
 ##############################
 ### initialize agent #########
 ##############################
-tools = [TotalRevenueReaderTool(), ClientSimilarityTool()]
+tools = [TotalRevenueReaderTool(), ClientSimilarityTool(), GetClientInformationTool()]
 config = dotenv_values('.env')
 openai_key = config['OPENAI_API_KEY']
-
-warnings.simplefilter("ignore", DeprecationWarning)
 
 conversational_memory = ConversationBufferWindowMemory(
     memory_key='chat_history',
@@ -25,20 +22,20 @@ conversational_memory = ConversationBufferWindowMemory(
 
 llm = ChatOpenAI(
     openai_api_key=openai_key,
-    temperature=0.2,
+    temperature=0,
     model_name="gpt-3.5-turbo"
 )
 
 agent = initialize_agent(
-    agent="chat-conversational-react-description",
+    agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
+    #agent=AgentType.OPENAI_FUNCTIONS,
     tools=tools,
     llm=llm,
-    max_iterations=2,
+    max_iterations=5,
     verbose=True,
     memory=conversational_memory,
     handle_parsing_errors=True,
     early_stopping_method='generate'
-    # check the output format
 )
 
 # set title

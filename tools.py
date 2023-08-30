@@ -28,7 +28,7 @@ session = cluster.connect()
 ### Total Revenue Reader Tool #########
 class TotalRevenueReaderTool(BaseTool):
     name = "Total Revenue Reader"
-    description = "This tool will read the total revenue from the Astra database"
+    description = "This tool will read the total revenue by client and return it so you can see it."
 
     def _run(self, client_id):  # add user uuid
         client_id = "1"
@@ -43,23 +43,43 @@ class TotalRevenueReaderTool(BaseTool):
         raise NotImplementedError("This tool does not support async")
 
 
-### ClientSimilarityTool #########
+### Client Similarity Tool #########
 class ClientSimilarityTool(BaseTool):
     name = "Client Similarity Tool"
-    description = "This tool will find the most similar client to the given client on different critera like credit card"
+    description = "This tool is used to search for client information like balance, credit score, has a credit card, " \
+                  "gender, surname, location, point earned and satisfaction score. " \
+                  "Note this does not contains user names or emails." \
+                  "Example query: what is the top 3 client in alabama ranked by credit score?"
 
     def _run(self, user_question):
         model_id = "text-embedding-ada-002"
         embedding = openai.Embedding.create(input=user_question, model=model_id)['data'][0]['embedding']
         query = f"SELECT client_id, surname, credit_score, location, gender, age, balance, has_credit_card, " \
                 f"estimated_salary, satisfaction_score, card_type, point_earned FROM {ASTRA_KEYSPACE_NAME}.ClientById " \
-                f"ORDER BY embedding_client ANN OF {embedding} LIMIT 1 "
+                f"ORDER BY embedding_client ANN OF {embedding} LIMIT 5 "
         rows = session.execute(query)
 
         client_list = []
-        for row in rows._current_rows:
-            brand_dict = {f"client id is {row.client_id}, current balance is {row.balance}, client's surname is {row.surname}, age is {row.age}, gender is {row.gender} , card type owned by client is {row.card_type}, credit score is {row.credit_score}, satisfaction score is {row.satisfaction_score}, point earned is {row.point_earned}, this client is located in {row.location}, client has a credit card is {row.has_credit_card}"}
-            client_list.append(brand_dict)
+        for row in rows:
+            client_list.append({f"client id is {row.client_id}, current balance is {row.balance}, client's surname is {row.surname}, age is {row.age}, gender is {row.gender} , card type owned by client is {row.card_type}, credit score is {row.credit_score}, satisfaction score is {row.satisfaction_score}, point earned is {row.point_earned}, this client is located in {row.location}, client has a credit card is {row.has_credit_card}"})
+        return client_list
+
+    def _arun(self, query: str):
+        raise NotImplementedError("This tool does not support async")
+
+# Get Client Information Tool
+class GetClientInformationTool(BaseTool):
+    name = "Get Client Information"
+    description = "This tool will get the client information"
+
+    def _run(self, client_id):
+        query = f"SELECT client_id, surname, credit_score, location, gender, age, balance, has_credit_card, " \
+                f"estimated_salary, satisfaction_score, card_type, point_earned FROM {ASTRA_KEYSPACE_NAME}.ClientById WHERE client_id = {client_id}"
+        rows = session.execute(query)
+        client_list = []
+        for row in rows:
+            client_list.append({f"client id is {row.client_id}, current balance is {row.balance}, client's surname is {row.surname}, age is {row.age}, gender is {row.gender} , card type owned by client is {row.card_type}, credit score is {row.credit_score}, satisfaction score is {row.satisfaction_score}, point earned is {row.point_earned}, this client is located in {row.location}, client has a credit card is {row.has_credit_card}"})
+        return client_list
 
         return client_list
 
