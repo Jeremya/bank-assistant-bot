@@ -10,7 +10,7 @@ Bank Assistant chat bot using LLM and AstraDB
 ## Setup
 
 - Clone the repository
-- Install the dependencies
+- Install the dependencies using `pip install -r requirements.txt`
 - Add your Astra info and OpenAI token in `.env` file
 - Run `client_loader.py` to import fake clients data in AstraDB
 - Run `main.py` using the command `streamlit run main.py`
