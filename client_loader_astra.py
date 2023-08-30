@@ -59,7 +59,6 @@ with open('resources/clients-dataset.csv', 'r') as file:
 
         # Create embedding for client containing all the rows
         embedding_client = openai.Embedding.create(input=row, model=model_id)['data'][0]['embedding']
-        print(row[0], client_id, embedding_client)
 
         # Insert values into Astra database
         session.execute(query, (client_id, surname, credit_score, location, gender, age, balance, has_credit_card,
