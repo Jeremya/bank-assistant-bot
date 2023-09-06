@@ -5,7 +5,7 @@ import json
 
 from dotenv import dotenv_values
 
-config = dotenv_values('.env')
+config = dotenv_values('../.env')
 openai.api_key = config['OPENAI_API_KEY']
 model_id = "text-embedding-ada-002"
 chroma_path = config['CHROMA_PERSISTENT_PATH']
@@ -13,7 +13,7 @@ chroma_client = chromadb.PersistentClient(path=chroma_path)
 
 collection = chroma_client.get_or_create_collection(name="bankflix")
 
-with open('resources/clients-dataset.csv', 'r') as file:
+with open('../resources/clients-dataset.csv', 'r') as file:
     reader = csv.reader(file)
     headers = next(reader)
 

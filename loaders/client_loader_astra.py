@@ -10,7 +10,7 @@ from cassandra.query import SimpleStatement
 # Description: This file will load the clients dataset into Astra DB
 
 # parameters #########
-config = dotenv_values('.env')
+config = dotenv_values('../.env')
 openai.api_key = config['OPENAI_API_KEY']
 SECURE_CONNECT_BUNDLE_PATH = config['SECURE_CONNECT_BUNDLE_PATH']
 ASTRA_CLIENT_ID = config['ASTRA_CLIENT_ID']
@@ -36,7 +36,7 @@ session = cluster.connect()
 # client_id, surname, credit_score, location, gender, age, balance, has_credit_card,
 # estimated_salary, satisfaction_score, card_type, point_earned, embedding_client
 
-with open('resources/clients-dataset.csv', 'r') as file:
+with open('../resources/clients-dataset.csv', 'r') as file:
     reader = csv.reader(file)
     headers = next(reader)
     query = SimpleStatement(f"INSERT INTO {ASTRA_KEYSPACE_NAME}.ClientById (client_id, surname, credit_score, location, gender, age, " \

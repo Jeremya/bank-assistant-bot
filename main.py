@@ -4,18 +4,17 @@ from langchain.agents import initialize_agent, AgentType
 from langchain.chat_models import ChatOpenAI
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 
-from tools import TotalRevenueReaderAstraTool, ClientSimilarityAstraTool, GetClientInformationAstraTool, \
-    ClientSimilarityChromaTool
-
 config = dotenv_values('.env')
 astra_or_chroma = config['ASTRA_OR_CHROMA']
 openai_key = config['OPENAI_API_KEY']
 
-### Open Database Connection #########
+### Load Tools #########
 if astra_or_chroma == "astra":
-    tools = [TotalRevenueReaderAstraTool(), ClientSimilarityAstraTool(), GetClientInformationAstraTool()]
+    from tools.tools_astra import TotalRevenueReaderTool, ClientSimilarityTool, GetClientInformationTool
+    tools = [TotalRevenueReaderTool(), ClientSimilarityTool(), GetClientInformationTool()]
 else:
-    tools = [ClientSimilarityChromaTool()]
+    from tools.tools_chroma import ClientSimilarityTool
+    tools = [ClientSimilarityTool()]
 
 
 ### Initialize the LangChain Agent #########
