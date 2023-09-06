@@ -4,15 +4,21 @@ from langchain.agents import initialize_agent, AgentType
 from langchain.chat_models import ChatOpenAI
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 
-from tools import TotalRevenueReaderTool, ClientSimilarityTool, GetClientInformationTool
+from tools import TotalRevenueReaderAstraTool, ClientSimilarityAstraTool, GetClientInformationAstraTool, \
+    ClientSimilarityChromaTool
 
-##############################
-### initialize agent #########
-##############################
-tools = [TotalRevenueReaderTool(), ClientSimilarityTool(), GetClientInformationTool()]
 config = dotenv_values('.env')
+astra_or_chroma = config['ASTRA_OR_CHROMA']
 openai_key = config['OPENAI_API_KEY']
 
+### Open Database Connection #########
+if astra_or_chroma == "astra":
+    tools = [TotalRevenueReaderAstraTool(), ClientSimilarityAstraTool(), GetClientInformationAstraTool()]
+else:
+    tools = [ClientSimilarityChromaTool()]
+
+
+### Initialize the LangChain Agent #########
 conversational_memory = ConversationBufferWindowMemory(
     memory_key='chat_history',
     ai_prefix='AI',
@@ -28,7 +34,6 @@ llm = ChatOpenAI(
 
 agent = initialize_agent(
     agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
-    #agent=AgentType.OPENAI_FUNCTIONS,
     tools=tools,
     llm=llm,
     max_iterations=5,

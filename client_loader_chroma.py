@@ -8,9 +8,10 @@ from dotenv import dotenv_values
 config = dotenv_values('.env')
 openai.api_key = config['OPENAI_API_KEY']
 model_id = "text-embedding-ada-002"
-chroma_client = chromadb.Client()
+chroma_path = config['CHROMA_PERSISTENT_PATH']
+chroma_client = chromadb.PersistentClient(path=chroma_path)
 
-collection = chroma_client.create_collection(name="bankflix")
+collection = chroma_client.get_or_create_collection(name="bankflix")
 
 with open('resources/clients-dataset.csv', 'r') as file:
     reader = csv.reader(file)
@@ -32,4 +33,4 @@ with open('resources/clients-dataset.csv', 'r') as file:
         # Insert the row into chroma
         collection.add(documents=[json_data], ids=[customer_id], embeddings=[embedding_client])
 
-        print(f"Inserted client {customer_id} into chroma")
+        print(f"Inserted client {customer_id} into ChromaDB")

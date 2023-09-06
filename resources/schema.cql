@@ -1,5 +1,7 @@
 USE bankflix;
 
+DROP TABLE ClientById;
+
 CREATE TABLE IF NOT EXISTS TotalRevenueByClient (
     client_id INT PRIMARY KEY,
     total_revenue DECIMAL,
@@ -20,6 +22,12 @@ CREATE TABLE IF NOT EXISTS ClientById (
     card_type TEXT,
     point_earned INT,
     embedding_client vector<float, 1536>,
+    PRIMARY KEY (client_id)
+);
+
+CREATE TABLE IF NOT EXISTS TransactionByCustomer (
+....
+    embedding_transaction vector<float, 1536>,
     PRIMARY KEY (client_id)
 );
 

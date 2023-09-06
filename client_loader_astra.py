@@ -36,7 +36,6 @@ session = cluster.connect()
 # client_id, surname, credit_score, location, gender, age, balance, has_credit_card,
 # estimated_salary, satisfaction_score, card_type, point_earned, embedding_client
 
-
 with open('resources/clients-dataset.csv', 'r') as file:
     reader = csv.reader(file)
     headers = next(reader)
