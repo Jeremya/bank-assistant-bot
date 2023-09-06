@@ -1,4 +1,5 @@
 import csv
+import json
 
 import openai
 from cassandra.auth import PlainTextAuthProvider
@@ -38,31 +39,29 @@ session = cluster.connect()
 
 with open('resources/clients-dataset.csv', 'r') as file:
     reader = csv.reader(file)
-    next(reader) # skip header row
+    headers = next(reader)
     query = SimpleStatement(f"INSERT INTO {ASTRA_KEYSPACE_NAME}.ClientById (client_id, surname, credit_score, location, gender, age, " \
             "balance, has_credit_card, estimated_salary, satisfaction_score, card_type, point_earned, " \
             "embedding_client) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
 
     for row in reader:
-        client_id = int(row[1])
-        surname = row[2]
-        credit_score = int(row[3])
-        location = row[4]
-        gender = row[5]
-        age = int(row[6])
-        balance = float(row[8])
-        has_credit_card = bool(row[10])
-        estimated_salary = float(row[12])
-        satisfaction_score = int(row[14])
-        card_type = row[16]
-        point_earned = int(row[17])
+        # Create a dictionary for the row using headers as keys
+        row_dict = dict(zip(headers, row))
 
-        # Create embedding for client containing all the rows
-        embedding_client = openai.Embedding.create(input=row, model=model_id)['data'][0]['embedding']
+        # Insert client information and embedding into chroma
+        json_data_row = json.dumps(row_dict)
+
+        # Create embedding for client containing all the columns
+        embedding_client = openai.Embedding.create(input=json_data_row, model=model_id)['data'][0]['embedding']
 
         # Insert values into Astra database
-        session.execute(query, (client_id, surname, credit_score, location, gender, age, balance, has_credit_card,
-                                estimated_salary, satisfaction_score, card_type, point_earned, embedding_client))
+        session.execute(query, (int(row_dict['CustomerId']), row_dict['Surname'], int(row_dict['CreditScore']), row_dict['Geography'], row_dict['Gender'], int(row_dict['Age']), float(row_dict['Balance']), bool(row_dict['HasCrCard']),
+                                float(row_dict['EstimatedSalary']), int(row_dict['Satisfaction Score']), row_dict['Card Type'], int(row_dict['Point Earned']), embedding_client))
+
+        print(f"Inserted client {row_dict['CustomerId']} into Astra DB")
+
+# Close the connection to the Astra database
+session.shutdown()
 
 ## TODO
 # failed to bind prepared statement on embedding type
