@@ -1,6 +1,6 @@
-USE bankflix;
+USE YOUR_KEYSPACE_NAME_HERE;
 
-DROP TABLE ClientById;
+DROP TABLE IF EXISTS ClientById;
 
 CREATE TABLE IF NOT EXISTS TotalRevenueByClient (
     client_id INT PRIMARY KEY,
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS ClientById (
 );
 
 CREATE TABLE IF NOT EXISTS TransactionByCustomer (
-....
+    client_id INT,
     embedding_transaction vector<float, 1536>,
     PRIMARY KEY (client_id)
 );
@@ -34,6 +34,3 @@ CREATE TABLE IF NOT EXISTS TransactionByCustomer (
 CREATE CUSTOM INDEX IF NOT EXISTS openai_client ON ClientById (embedding_client) USING 'org.apache.cassandra.index.sai.StorageAttachedIndex';
 
 INSERT INTO TotalRevenueByClient (client_id, total_revenue, update_time) VALUES (1, 123123.42, dateOf(now()));
-
-
-
